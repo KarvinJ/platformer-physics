@@ -41,7 +41,7 @@ public class Player {
 
         if (bounds.y < 0) {
 
-            bounds.y = 600 - bounds.height;
+            bounds.y = 300 - bounds.height;
             bounds.x = 200;
             velocity.y = 0;
         }

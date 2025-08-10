@@ -43,7 +43,7 @@ public class Platform extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
-        player = new Player(new Rectangle(400, 200, 32, 32));
+        player = new Player(new Rectangle(400, 150, 32, 32));
 
         structures.add(
             new Rectangle(100, 400, 200, 32),
@@ -98,7 +98,7 @@ public class Platform extends ApplicationAdapter {
 
     private void managePlayerFloorCollision(float deltaTime) {
 
-        //it has some collision problems with the rectangles of the tiled map., with some rectangles it seems to work. 
+        //it seems that the collision only works if the height of the rectangle is less or equal than 32
         for (Rectangle platform : collisionRectangles) {
 
             if (player.bounds.overlaps(platform)) {
