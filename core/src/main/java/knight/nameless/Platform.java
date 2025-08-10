@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -22,9 +21,7 @@ public class Platform extends ApplicationAdapter {
     public OrthographicCamera camera = new OrthographicCamera();
     public ExtendViewport viewport;
     private final Array<Rectangle> structures = new Array<>();
-    public final Vector2 velocity = new Vector2(0,0);
-    private final Rectangle playerBounds = new Rectangle(400, 200, 32, 32);
-    private final int speed = 50;
+    private Player player;
 
     @Override
     public void create() {
@@ -35,6 +32,8 @@ public class Platform extends ApplicationAdapter {
         //the batch and shape needs to be initialized in the create method
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
+
+        player = new Player(new Rectangle(400, 200, 32, 32));
 
         structures.add(
             new Rectangle(100, 400, 200, 32),
@@ -49,14 +48,6 @@ public class Platform extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-    }
-
-    public Rectangle getPreviousPosition() {
-
-        float positionX = playerBounds.x - velocity.x;
-        float positionY = playerBounds.y - velocity.y;
-
-        return new Rectangle(positionX, positionY, playerBounds.width, playerBounds.height);
     }
 
     private boolean checkCollisionInX(Rectangle player, Rectangle platform) {
@@ -75,39 +66,39 @@ public class Platform extends ApplicationAdapter {
 
         for (Rectangle platform : structures) {
 
-            if (playerBounds.overlaps(platform)) {
+            if (player.bounds.overlaps(platform)) {
 
 //                If the player previous position is within the x bounds of the platform,
 //                then we need to resolve the collision by changing the y value
-                if (checkCollisionInX(getPreviousPosition(), platform)) {
+                if (checkCollisionInX(player.getPreviousPosition(), platform)) {
 
 //                    Player was falling downwards. Resolve upwards.
-                    if (velocity.y < 0)
-                        playerBounds.y = platform.y + playerBounds.height;
+                    if (player.velocity.y < 0)
+                        player.bounds.y = platform.y + player.bounds.height;
 
 //                     Player was moving upwards. Resolve downwards
                     else
-                        playerBounds.y = platform.y - playerBounds.height;
+                        player.bounds.y = platform.y - player.bounds.height;
 
-                    velocity.y = 0;
+                    player.velocity.y = 0;
                 }
                 //  If the player previous position is within the y bounds of the platform,
 //                then we need to resolve the collision by changing the x value
-                else if (checkCollisionInY(getPreviousPosition(), platform)) {
+                else if (checkCollisionInY(player.getPreviousPosition(), platform)) {
 
 //                     Player was traveling right. Resolve to the left
-                    if (velocity.x > 0)
-                        playerBounds.x = platform.x - playerBounds.width;
+                    if (player.velocity.x > 0)
+                        player.bounds.x = platform.x - player.bounds.width;
 
 //                     Player was traveling left. Resolve to the right
                     else
-                        playerBounds.x = platform.x + platform.width;
+                        player.bounds.x = platform.x + platform.width;
 
-                    velocity.x = 0;
+                    player.velocity.x = 0;
                 }
 
-                if (velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
-                    velocity.y = 800 * deltaTime;
+                if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
+                    player.velocity.y = 800 * deltaTime;
             }
         }
     }
@@ -115,30 +106,7 @@ public class Platform extends ApplicationAdapter {
 
     private void update(float deltaTime) {
 
-        //gravity
-        velocity.y -= 20.8f * deltaTime;
-
-        //  Update the player's position
-        playerBounds.y += velocity.y;
-        playerBounds.x += velocity.x;
-
-        // To avoid that my player keep going forward infinitely, I multiply the velocity, by my coefficient of friction 0.9
-//        This will subtract 10% of the player's speed every frame, eventually bringing the player to a stop.
-        velocity.x *= 0.9f;
-
-//                -- Increase the player's x speed
-        if (Gdx.input.isKeyPressed(Input.Keys.D))
-            velocity.x += speed * deltaTime;
-
-        else if (Gdx.input.isKeyPressed(Input.Keys.A))
-            velocity.x -= speed * deltaTime;
-
-        if(playerBounds.y < 0) {
-
-            playerBounds.y = 600 - playerBounds.height;
-            playerBounds.x = 200;
-            velocity.y = 0;
-        }
+        player.update(deltaTime);
 
         managePlayerFloorCollision(deltaTime);
     }
@@ -163,7 +131,7 @@ public class Platform extends ApplicationAdapter {
         }
 
         shapeRenderer.setColor(Color.WHITE);
-        shapeRenderer.rect(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height);
+        player.draw(shapeRenderer);
 
         shapeRenderer.end();
 
