@@ -6,8 +6,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import javax.swing.*;
-
 public class Player {
 
     public final Rectangle bounds;
@@ -41,7 +39,7 @@ public class Player {
 
         if (bounds.y < 0) {
 
-            bounds.y = 300 - bounds.height;
+            bounds.y = 400 - bounds.height;
             bounds.x = 200;
             velocity.y = 0;
         }

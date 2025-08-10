@@ -46,9 +46,9 @@
 </data>
  </layer>
  <objectgroup id="3" name="Collisions">
-  <object id="4" x="467" y="590.343" width="41.6667" height="32"/>
+  <object id="4" x="467" y="590.343" width="41.6667" height="48.9669"/>
   <object id="5" x="606.343" y="450.002" width="49.657" height="32"/>
-  <object id="9" x="-0.998051" y="590.846" width="386.246" height="32"/>
+  <object id="9" x="-0.998051" y="590.846" width="386.246" height="47.9688"/>
  </objectgroup>
  <layer id="2" name="Terrain" width="80" height="40">
   <data encoding="csv">

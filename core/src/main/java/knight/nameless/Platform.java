@@ -43,16 +43,16 @@ public class Platform extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
-        player = new Player(new Rectangle(400, 150, 32, 32));
+        player = new Player(new Rectangle(200, 300, 32, 32));
 
         structures.add(
-            new Rectangle(100, 400, 200, 32),
+            new Rectangle(100, 250, 200, 40),
             new Rectangle(400, 175, 200, 32),
             new Rectangle(225, 85, 200, 32),
-            new Rectangle(700, 30, 150, 32)
+            new Rectangle(700, 40, 150, 32)
         );
 
-        structures.add(new Rectangle(0, 0, SCREEN_WIDTH, 32));
+        structures.add(new Rectangle(0, 0, SCREEN_WIDTH, 40));
 
         TiledMap tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
 
@@ -98,7 +98,6 @@ public class Platform extends ApplicationAdapter {
 
     private void managePlayerFloorCollision(float deltaTime) {
 
-        //it seems that the collision only works if the height of the rectangle is less or equal than 32
         for (Rectangle platform : collisionRectangles) {
 
             if (player.bounds.overlaps(platform)) {
@@ -109,7 +108,7 @@ public class Platform extends ApplicationAdapter {
 
 //                    Player was falling downwards. Resolve upwards.
                     if (player.velocity.y < 0)
-                        player.bounds.y = platform.y + player.bounds.height;
+                        player.bounds.y = platform.y + platform.height;
 
 //                     Player was moving upwards. Resolve downwards
                     else
