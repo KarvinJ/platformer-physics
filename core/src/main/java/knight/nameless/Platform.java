@@ -7,6 +7,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapLayers;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -22,6 +30,8 @@ public class Platform extends ApplicationAdapter {
     public ExtendViewport viewport;
     private final Array<Rectangle> structures = new Array<>();
     private Player player;
+    private OrthogonalTiledMapRenderer mapRenderer;
+    private final Array<Rectangle> collisionRectangles = new Array<>();
 
     @Override
     public void create() {
@@ -43,6 +53,30 @@ public class Platform extends ApplicationAdapter {
         );
 
         structures.add(new Rectangle(0, 0, SCREEN_WIDTH, 32));
+
+        TiledMap tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
+
+        mapRenderer = setupMap(tiledMap);
+    }
+
+    public OrthogonalTiledMapRenderer setupMap(TiledMap tiledMap) {
+
+        MapLayers mapLayers = tiledMap.getLayers();
+
+        for (MapLayer mapLayer : mapLayers)
+            parseMapObjectsToBounds(mapLayer.getObjects());
+
+        return new OrthogonalTiledMapRenderer(tiledMap, 1);
+    }
+
+    private void parseMapObjectsToBounds(MapObjects mapObjects) {
+
+        for (MapObject mapObject : mapObjects) {
+
+            Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
+
+            collisionRectangles.add(rectangle);
+        }
     }
 
     @Override
@@ -64,7 +98,8 @@ public class Platform extends ApplicationAdapter {
 
     private void managePlayerFloorCollision(float deltaTime) {
 
-        for (Rectangle platform : structures) {
+        //it has some collision problems with the rectangles of the tiled map., with some rectangles it seems to work. 
+        for (Rectangle platform : collisionRectangles) {
 
             if (player.bounds.overlaps(platform)) {
 
@@ -103,7 +138,6 @@ public class Platform extends ApplicationAdapter {
         }
     }
 
-
     private void update(float deltaTime) {
 
         player.update(deltaTime);
@@ -125,7 +159,12 @@ public class Platform extends ApplicationAdapter {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        for (var structure :structures) {
+//        for (var structure :structures) {
+//
+//            shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
+//        }
+
+        for (var structure :collisionRectangles) {
 
             shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
         }
@@ -145,5 +184,6 @@ public class Platform extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         shapeRenderer.dispose();
+        mapRenderer.dispose();
     }
 }
