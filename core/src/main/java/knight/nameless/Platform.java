@@ -5,33 +5,31 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapLayers;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.*;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class Platform extends ApplicationAdapter {
 
-    public final int SCREEN_WIDTH = 1280;
-    public final int SCREEN_HEIGHT = 720;
-    private SpriteBatch batch;
+    public final int SCREEN_WIDTH = 960;
+    public final int SCREEN_HEIGHT = 544;
     private ShapeRenderer shapeRenderer;
     public OrthographicCamera camera = new OrthographicCamera();
     public ExtendViewport viewport;
     private Player player;
+    private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer mapRenderer;
     private final Array<Rectangle> collisionBounds = new Array<>();
     private boolean isDebugRenderer = false;
+    private boolean isDebugCamera = false;
 
     @Override
     public void create() {
@@ -40,13 +38,11 @@ public class Platform extends ApplicationAdapter {
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         //the batch and shape needs to be initialized in the create method
-        batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
-        player = new Player(new Rectangle(200, 300, 32, 32));
+        player = new Player(new Rectangle(500, 300, 32, 32));
 
-        TiledMap tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
-
+        tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
         mapRenderer = setupMap(tiledMap);
     }
 
@@ -122,10 +118,49 @@ public class Platform extends ApplicationAdapter {
                     player.velocity.x = 0;
                 }
 
+                //there is some inconsistencies with the jump sometimes.
                 if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
                     player.velocity.y = 800 * deltaTime;
             }
         }
+    }
+
+    private void controlCameraPosition(OrthographicCamera camera) {
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            camera.position.x += 1;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+            camera.position.x -= 1;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP))
+            camera.position.y += 1;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+            camera.position.y -= 1;
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3))
+            camera.zoom += 0.1f;
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F4))
+            camera.zoom -= 0.1f;
+    }
+
+    public boolean isPlayerInsideMapBounds(Vector2 playerPixelPosition){
+
+        MapProperties properties = tiledMap.getProperties();
+
+        int mapWidth = properties.get("width", Integer.class);
+//        int mapHeight = properties.get("height", Integer.class);
+        int tilePixelWidth = properties.get("tilewidth", Integer.class);
+//        int tilePixelHeight = properties.get("tileheight", Integer.class);
+
+        int mapPixelWidth = mapWidth * tilePixelWidth;
+//        int mapPixelHeight = mapHeight * tilePixelHeight;
+
+        var midScreenWidth = SCREEN_WIDTH / 2f;
+
+        return playerPixelPosition.x > midScreenWidth && playerPixelPosition.x < mapPixelWidth - midScreenWidth;
     }
 
     private void update(float deltaTime) {
@@ -133,6 +168,21 @@ public class Platform extends ApplicationAdapter {
         player.update(deltaTime);
 
         managePlayerAndStructureCollision(deltaTime);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
+            isDebugCamera = !isDebugCamera;
+
+        if (isDebugCamera)
+            controlCameraPosition(camera);
+
+        var playerPosition = new Vector2(player.bounds.x, player.bounds.y);
+
+        var isPlayerInsideMapBounds = isPlayerInsideMapBounds(playerPosition);
+
+        if (!isDebugCamera && isPlayerInsideMapBounds)
+            camera.position.set(player.bounds.x, 275, 0);
+
+        camera.update();
     }
 
     void draw() {
@@ -186,8 +236,8 @@ public class Platform extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        batch.dispose();
         shapeRenderer.dispose();
+        tiledMap.dispose();
         mapRenderer.dispose();
     }
 }
