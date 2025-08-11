@@ -151,12 +151,8 @@ public class Platform extends ApplicationAdapter {
         MapProperties properties = tiledMap.getProperties();
 
         int mapWidth = properties.get("width", Integer.class);
-//        int mapHeight = properties.get("height", Integer.class);
         int tilePixelWidth = properties.get("tilewidth", Integer.class);
-//        int tilePixelHeight = properties.get("tileheight", Integer.class);
-
         int mapPixelWidth = mapWidth * tilePixelWidth;
-//        int mapPixelHeight = mapHeight * tilePixelHeight;
 
         var midScreenWidth = SCREEN_WIDTH / 2f;
 
