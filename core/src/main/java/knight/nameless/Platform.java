@@ -28,10 +28,10 @@ public class Platform extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public OrthographicCamera camera = new OrthographicCamera();
     public ExtendViewport viewport;
-    private final Array<Rectangle> structures = new Array<>();
     private Player player;
     private OrthogonalTiledMapRenderer mapRenderer;
-    private final Array<Rectangle> collisionRectangles = new Array<>();
+    private final Array<Rectangle> collisionBounds = new Array<>();
+    private boolean isDebugRenderer = false;
 
     @Override
     public void create() {
@@ -44,15 +44,6 @@ public class Platform extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
 
         player = new Player(new Rectangle(200, 300, 32, 32));
-
-        structures.add(
-            new Rectangle(100, 250, 200, 40),
-            new Rectangle(400, 175, 200, 32),
-            new Rectangle(225, 85, 200, 32),
-            new Rectangle(700, 40, 150, 32)
-        );
-
-        structures.add(new Rectangle(0, 0, SCREEN_WIDTH, 40));
 
         TiledMap tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
 
@@ -75,7 +66,7 @@ public class Platform extends ApplicationAdapter {
 
             Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
 
-            collisionRectangles.add(rectangle);
+            collisionBounds.add(rectangle);
         }
     }
 
@@ -96,37 +87,37 @@ public class Platform extends ApplicationAdapter {
             && player.y < platform.y + platform.height;
     }
 
-    private void managePlayerFloorCollision(float deltaTime) {
+    private void managePlayerAndStructureCollision(float deltaTime) {
 
-        for (Rectangle platform : collisionRectangles) {
+        for (var structure : collisionBounds) {
 
-            if (player.bounds.overlaps(platform)) {
+            if (player.bounds.overlaps(structure)) {
 
 //                If the player previous position is within the x bounds of the platform,
 //                then we need to resolve the collision by changing the y value
-                if (checkCollisionInX(player.getPreviousPosition(), platform)) {
+                if (checkCollisionInX(player.getPreviousPosition(), structure)) {
 
 //                    Player was falling downwards. Resolve upwards.
                     if (player.velocity.y < 0)
-                        player.bounds.y = platform.y + platform.height;
+                        player.bounds.y = structure.y + structure.height;
 
 //                     Player was moving upwards. Resolve downwards
                     else
-                        player.bounds.y = platform.y - player.bounds.height;
+                        player.bounds.y = structure.y - player.bounds.height;
 
                     player.velocity.y = 0;
                 }
                 //  If the player previous position is within the y bounds of the platform,
 //                then we need to resolve the collision by changing the x value
-                else if (checkCollisionInY(player.getPreviousPosition(), platform)) {
+                else if (checkCollisionInY(player.getPreviousPosition(), structure)) {
 
 //                     Player was traveling right. Resolve to the left
                     if (player.velocity.x > 0)
-                        player.bounds.x = platform.x - player.bounds.width;
+                        player.bounds.x = structure.x - player.bounds.width;
 
 //                     Player was traveling left. Resolve to the right
                     else
-                        player.bounds.x = platform.x + platform.width;
+                        player.bounds.x = structure.x + structure.width;
 
                     player.velocity.x = 0;
                 }
@@ -141,7 +132,22 @@ public class Platform extends ApplicationAdapter {
 
         player.update(deltaTime);
 
-        managePlayerFloorCollision(deltaTime);
+        managePlayerAndStructureCollision(deltaTime);
+    }
+
+    void draw() {
+
+        mapRenderer.setView(camera);
+
+        mapRenderer.render();
+
+        mapRenderer.getBatch().setProjectionMatrix(viewport.getCamera().combined);
+
+        mapRenderer.getBatch().begin();
+
+//        player.draw(mapRenderer.getBatch());
+
+        mapRenderer.getBatch().end();
     }
 
     @Override
@@ -151,32 +157,31 @@ public class Platform extends ApplicationAdapter {
 
         update(deltaTime);
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
+            isDebugRenderer = !isDebugRenderer;
+
         ScreenUtils.clear(Color.BLACK);
+
+        if (!isDebugRenderer)
+            draw();
 
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        shapeRenderer.setColor(Color.DARK_GRAY);
+        shapeRenderer.setColor(Color.GREEN);
 
-//        for (var structure :structures) {
-//
-//            shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
-//        }
+        if (isDebugRenderer) {
 
-        for (var structure :collisionRectangles) {
+            for (var structure : collisionBounds) {
 
-            shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
+                shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
+            }
         }
 
         shapeRenderer.setColor(Color.WHITE);
         player.draw(shapeRenderer);
 
         shapeRenderer.end();
-
-//        batch.setProjectionMatrix(viewport.getCamera().combined);
-//        batch.begin();
-//
-//        batch.end();
     }
 
     @Override
