@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+
 import knight.nameless.objects.Enemy;
 import knight.nameless.objects.GameObject;
 import knight.nameless.objects.Player;
@@ -98,49 +99,46 @@ public class Platform extends ApplicationAdapter {
             && bounds.y < platform.y + platform.height;
     }
 
-    private void manageStructureCollision(float deltaTime) {
+    private void manageStructureCollision(float deltaTime, GameObject gameObject) {
 
-        for (GameObject gameObject : gameObjects) {
+        for (var structure : collisionBounds) {
 
-            for (var structure : collisionBounds) {
-
-                if (gameObject.bounds.overlaps(structure)) {
+            if (gameObject.bounds.overlaps(structure)) {
 
 //                If the player previous position is within the x bounds of the platform,
 //                then we need to resolve the collision by changing the y value
-                    if (checkCollisionInX(gameObject.getPreviousPosition(), structure)) {
+                if (checkCollisionInX(gameObject.getPreviousPosition(), structure)) {
 
 //                    Player was falling downwards. Resolve upwards.
-                        if (gameObject.velocity.y < 0)
-                            gameObject.bounds.y = structure.y + structure.height;
+                    if (gameObject.velocity.y < 0)
+                        gameObject.bounds.y = structure.y + structure.height;
 
 //                     Player was moving upwards. Resolve downwards
-                        else
-                            gameObject.bounds.y = structure.y - gameObject.bounds.height;
+                    else
+                        gameObject.bounds.y = structure.y - gameObject.bounds.height;
 
-                        gameObject.velocity.y = 0;
-                    }
-                    //  If the player previous position is within the y bounds of the platform,
+                    gameObject.velocity.y = 0;
+                }
+                //  If the player previous position is within the y bounds of the platform,
 //                then we need to resolve the collision by changing the x value
-                    else if (checkCollisionInY(player.getPreviousPosition(), structure)) {
+                else if (checkCollisionInY(gameObject.getPreviousPosition(), structure)) {
 
 //                     Player was traveling right. Resolve to the left
-                        if (gameObject.velocity.x > 0)
-                            gameObject.bounds.x = structure.x - gameObject.bounds.width;
+                    if (gameObject.velocity.x > 0)
+                        gameObject.bounds.x = structure.x - gameObject.bounds.width;
 
 //                     Player was traveling left. Resolve to the right
-                        else
-                            gameObject.bounds.x = structure.x + structure.width;
+                    else
+                        gameObject.bounds.x = structure.x + structure.width;
 
-                        gameObject.velocity.x = 0;
-                    }
-
-                    //there is some inconsistencies with the jump sometimes.
-                    if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
-                        player.velocity.y = 800 * deltaTime;
+                    gameObject.velocity.x = 0;
                 }
             }
         }
+
+        //there is some inconsistencies with the jump sometimes.
+        if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
+            player.velocity.y = 800 * deltaTime;
     }
 
     private void controlCameraPosition(OrthographicCamera camera) {
@@ -164,7 +162,7 @@ public class Platform extends ApplicationAdapter {
             camera.zoom -= 0.1f;
     }
 
-    public boolean isPlayerInsideMapBounds(Vector2 playerPixelPosition){
+    public boolean isPlayerInsideMapBounds(Vector2 playerPixelPosition) {
 
         MapProperties properties = tiledMap.getProperties();
 
@@ -182,9 +180,8 @@ public class Platform extends ApplicationAdapter {
         for (GameObject gameObject : gameObjects) {
 
             gameObject.update(deltaTime);
+            manageStructureCollision(deltaTime, gameObject);
         }
-
-        manageStructureCollision(deltaTime);
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
             isDebugCamera = !isDebugCamera;
@@ -197,7 +194,7 @@ public class Platform extends ApplicationAdapter {
         var isPlayerInsideMapBounds = isPlayerInsideMapBounds(playerPosition);
 
         if (!isDebugCamera && isPlayerInsideMapBounds)
-            camera.position.set(player.bounds.x, 200, 0);
+            camera.position.set(playerPosition.x, 200, 0);
 
         camera.update();
     }
@@ -225,6 +222,8 @@ public class Platform extends ApplicationAdapter {
 
         float deltaTime = Gdx.graphics.getDeltaTime();
 
+        System.out.println(deltaTime);
+
         update(deltaTime);
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
@@ -234,25 +233,27 @@ public class Platform extends ApplicationAdapter {
 
         if (!isDebugRenderer)
             draw();
+        else
+            debugDraw();
+    }
+
+    private void debugDraw() {
 
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
         shapeRenderer.setColor(Color.GREEN);
 
-        if (isDebugRenderer) {
+        for (var structure : collisionBounds) {
 
-            for (var structure : collisionBounds) {
+            shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
+        }
 
-                shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
-            }
+        shapeRenderer.setColor(Color.WHITE);
 
-            shapeRenderer.setColor(Color.WHITE);
+        for (var gameObject : gameObjects) {
 
-            for (var gameObject : gameObjects) {
-
-                gameObject.draw(shapeRenderer);
-            }
+            gameObject.draw(shapeRenderer);
         }
 
         shapeRenderer.end();
