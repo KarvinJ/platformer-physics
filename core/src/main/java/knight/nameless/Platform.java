@@ -29,7 +29,6 @@ public class Platform extends ApplicationAdapter {
     public OrthographicCamera camera = new OrthographicCamera();
     public ExtendViewport viewport;
     private Player player;
-    private Enemy enemy;
     private TextureAtlas atlas;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer mapRenderer;
@@ -51,9 +50,7 @@ public class Platform extends ApplicationAdapter {
         atlas = new TextureAtlas("images/sprites.atlas");
         player = new Player(new Rectangle(450, 50, 32, 32), atlas);
 
-        enemy = new Enemy(new Rectangle(200, 200, 32, 32), atlas);
-
-        gameObjects.add(player, enemy);
+        gameObjects.add(player);
 
         tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
         mapRenderer = setupMap(tiledMap);
@@ -63,18 +60,24 @@ public class Platform extends ApplicationAdapter {
 
         MapLayers mapLayers = tiledMap.getLayers();
 
-        for (MapLayer mapLayer : mapLayers)
-            parseMapObjectsToBounds(mapLayer.getObjects());
+        for (MapLayer mapLayer : mapLayers) {
+
+            parseMapObjectsToBounds(mapLayer.getObjects(), mapLayer.getName());
+        }
 
         return new OrthogonalTiledMapRenderer(tiledMap, 1);
     }
 
-    private void parseMapObjectsToBounds(MapObjects mapObjects) {
+    private void parseMapObjectsToBounds(MapObjects mapObjects, String layerName) {
 
         for (MapObject mapObject : mapObjects) {
 
-            Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
-            collisionBounds.add(rectangle);
+            Rectangle objectBounds = ((RectangleMapObject) mapObject).getRectangle();
+
+            if (layerName.equals("Enemies"))
+                gameObjects.add(new Enemy(objectBounds, atlas));
+            else
+                collisionBounds.add(objectBounds);
         }
     }
 
@@ -176,9 +179,10 @@ public class Platform extends ApplicationAdapter {
 
     private void update(float deltaTime) {
 
-        player.update(deltaTime);
+        for (GameObject gameObject : gameObjects) {
 
-        enemy.update(deltaTime);
+            gameObject.update(deltaTime);
+        }
 
         manageStructureCollision(deltaTime);
 
@@ -244,7 +248,11 @@ public class Platform extends ApplicationAdapter {
             }
 
             shapeRenderer.setColor(Color.WHITE);
-            player.draw(shapeRenderer);
+
+            for (var gameObject : gameObjects) {
+
+                gameObject.draw(shapeRenderer);
+            }
         }
 
         shapeRenderer.end();
@@ -257,6 +265,10 @@ public class Platform extends ApplicationAdapter {
         tiledMap.dispose();
         mapRenderer.dispose();
         atlas.dispose();
-        player.dispose();
+
+        for (var gameObject : gameObjects)
+            gameObject.dispose();
+
+        gameObjects.clear();
     }
 }

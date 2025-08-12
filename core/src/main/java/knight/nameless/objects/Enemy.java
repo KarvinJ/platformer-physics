@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Enemy extends GameObject {
+
     private final Animation<TextureRegion> runningAnimation;
     private float stateTimer;
     public boolean isMovingRight;
@@ -29,7 +30,8 @@ public class Enemy extends GameObject {
         stateTimer = 0;
     }
 
-    public void update(float deltaTime) {
+    @Override
+    protected void childUpdate(float deltaTime) {
 
         stateTimer += deltaTime;
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class SimplePlayer {
+
     public final Rectangle bounds;
     public final Vector2 velocity = new Vector2(0, 0);
     public final int speed = 50;

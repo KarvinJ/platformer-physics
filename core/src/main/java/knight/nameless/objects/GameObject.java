@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public abstract class GameObject {
+
     public final Rectangle bounds;
     protected TextureRegion actualRegion;
     public final Vector2 velocity = new Vector2(0, 0);
@@ -22,6 +23,13 @@ public abstract class GameObject {
         actualRegion = region;
         regionWidth = region.getRegionWidth();
         regionHeight = region.getRegionHeight();
+    }
+
+    protected abstract void childUpdate(float deltaTime);
+
+    public void update(float deltaTime) {
+
+        childUpdate(deltaTime);
     }
 
     public void draw(Batch batch) {

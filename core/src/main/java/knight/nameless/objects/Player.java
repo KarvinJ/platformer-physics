@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Player extends GameObject {
+
     private enum AnimationState {FALLING, JUMPING, STANDING, RUNNING}
     private AnimationState actualState;
     private AnimationState previousState;
@@ -33,7 +34,8 @@ public class Player extends GameObject {
         runningAnimation = makeAnimationByTotalFrames(atlas.findRegion("Run"), 5);
     }
 
-    public void update(float deltaTime) {
+    @Override
+    protected void childUpdate(float deltaTime) {
 
         actualRegion = getAnimationRegion(deltaTime);
 
