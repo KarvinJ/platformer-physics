@@ -12,11 +12,16 @@ public abstract class GameObject {
     public final Rectangle bounds;
     protected TextureRegion actualRegion;
     public final Vector2 velocity = new Vector2(0, 0);
+    private final int regionWidth;
+    private final int regionHeight;
+    public final int speed = 50;
 
     protected GameObject(Rectangle bounds, TextureRegion region) {
 
         this.bounds = bounds;
         actualRegion = region;
+        regionWidth = region.getRegionWidth();
+        regionHeight = region.getRegionHeight();
     }
 
     public void draw(Batch batch) {
@@ -29,12 +34,15 @@ public abstract class GameObject {
         shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    protected Animation<TextureRegion> makeAnimationByFrameRange(TextureRegion characterRegion, int finalFrame, int width, int height) {
+    protected Animation<TextureRegion> makeAnimationByTotalFrames(TextureRegion characterRegion, int totalFrames) {
 
         Array<TextureRegion> animationFrames = new Array<>();
 
-        for (int i = 0; i <= finalFrame; i++)
-            animationFrames.add(new TextureRegion(characterRegion, i * width, 0, width, height));
+        for (int i = 0; i <= totalFrames; i++) {
+
+            var actualFrame = new TextureRegion(characterRegion, i * regionWidth, 0, regionWidth, regionHeight);
+            animationFrames.add(actualFrame);
+        }
 
         return new Animation<>(0.1f, animationFrames);
     }
@@ -47,5 +55,7 @@ public abstract class GameObject {
         return new Rectangle(positionX, positionY, bounds.width, bounds.height);
     }
 
-    public void dispose() {actualRegion.getTexture().dispose();}
+    public void dispose() {
+        actualRegion.getTexture().dispose();
+    }
 }

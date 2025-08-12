@@ -16,7 +16,6 @@ public class Player extends GameObject {
     private final Animation<TextureRegion> runningAnimation;
     private float animationTimer;
     private boolean isMovingRight;
-    public final int speed = 50;
 
     public Player(Rectangle bounds, TextureAtlas atlas) {
         super(
@@ -27,11 +26,11 @@ public class Player extends GameObject {
         previousState = AnimationState.STANDING;
         actualState = AnimationState.STANDING;
 
-        standingAnimation = makeAnimationByFrameRange(atlas.findRegion("Idle"), 5, 32, 32);
+        standingAnimation = makeAnimationByTotalFrames(atlas.findRegion("Idle"), 5);
 
         jumpingRegion = new TextureRegion(atlas.findRegion("Jump"), 0, 0, 32, 32);
 
-        runningAnimation = makeAnimationByFrameRange(atlas.findRegion("Run"), 5, 32, 32);
+        runningAnimation = makeAnimationByTotalFrames(atlas.findRegion("Run"), 5);
     }
 
     public void update(float deltaTime) {
