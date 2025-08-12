@@ -1,4 +1,4 @@
-package knight.nameless;
+package knight.nameless.objects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -6,13 +6,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-public class Player {
-
+public class SimplePlayer {
     public final Rectangle bounds;
     public final Vector2 velocity = new Vector2(0, 0);
     public final int speed = 50;
 
-    public Player(Rectangle bounds) {
+    public SimplePlayer(Rectangle bounds) {
 
         this.bounds = bounds;
     }

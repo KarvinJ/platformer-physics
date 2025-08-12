@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.*;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import knight.nameless.objects.Player;
 
 public class Platform extends ApplicationAdapter {
 
@@ -25,6 +27,7 @@ public class Platform extends ApplicationAdapter {
     public OrthographicCamera camera = new OrthographicCamera();
     public ExtendViewport viewport;
     private Player player;
+    private TextureAtlas atlas;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer mapRenderer;
     private final Array<Rectangle> collisionBounds = new Array<>();
@@ -35,12 +38,14 @@ public class Platform extends ApplicationAdapter {
     public void create() {
 
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
+        camera.zoom = 0.7f;
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         //the batch and shape needs to be initialized in the create method
         shapeRenderer = new ShapeRenderer();
 
-        player = new Player(new Rectangle(500, 300, 32, 32));
+        atlas = new TextureAtlas("images/sprites.atlas");
+        player = new Player(new Rectangle(450, 50, 32, 32), atlas);
 
         tiledMap = new TmxMapLoader().load("maps/playground/test3.tmx");
         mapRenderer = setupMap(tiledMap);
@@ -61,7 +66,6 @@ public class Platform extends ApplicationAdapter {
         for (MapObject mapObject : mapObjects) {
 
             Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
-
             collisionBounds.add(rectangle);
         }
     }
@@ -71,16 +75,16 @@ public class Platform extends ApplicationAdapter {
         viewport.update(width, height);
     }
 
-    private boolean checkCollisionInX(Rectangle player, Rectangle platform) {
+    private boolean checkCollisionInX(Rectangle bounds, Rectangle platform) {
 
-        return player.x + player.width > platform.x
-            && player.x < platform.x + platform.width;
+        return bounds.x + bounds.width > platform.x
+            && bounds.x < platform.x + platform.width;
     }
 
-    private boolean checkCollisionInY(Rectangle player, Rectangle platform) {
+    private boolean checkCollisionInY(Rectangle bounds, Rectangle platform) {
 
-        return player.y + player.height > platform.y
-            && player.y < platform.y + platform.height;
+        return bounds.y + bounds.height > platform.y
+            && bounds.y < platform.y + platform.height;
     }
 
     private void managePlayerAndStructureCollision(float deltaTime) {
@@ -176,7 +180,7 @@ public class Platform extends ApplicationAdapter {
         var isPlayerInsideMapBounds = isPlayerInsideMapBounds(playerPosition);
 
         if (!isDebugCamera && isPlayerInsideMapBounds)
-            camera.position.set(player.bounds.x, 275, 0);
+            camera.position.set(player.bounds.x, 200, 0);
 
         camera.update();
     }
@@ -191,7 +195,7 @@ public class Platform extends ApplicationAdapter {
 
         mapRenderer.getBatch().begin();
 
-//        player.draw(mapRenderer.getBatch());
+        player.draw(mapRenderer.getBatch());
 
         mapRenderer.getBatch().end();
     }
@@ -212,7 +216,7 @@ public class Platform extends ApplicationAdapter {
             draw();
 
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
         shapeRenderer.setColor(Color.GREEN);
 
@@ -222,18 +226,21 @@ public class Platform extends ApplicationAdapter {
 
                 shapeRenderer.rect(structure.x, structure.y, structure.width, structure.height);
             }
-        }
 
-        shapeRenderer.setColor(Color.WHITE);
-        player.draw(shapeRenderer);
+            shapeRenderer.setColor(Color.WHITE);
+            player.draw(shapeRenderer);
+        }
 
         shapeRenderer.end();
     }
 
     @Override
     public void dispose() {
+
         shapeRenderer.dispose();
         tiledMap.dispose();
         mapRenderer.dispose();
+        atlas.dispose();
+        player.dispose();
     }
 }

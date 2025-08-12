@@ -2,7 +2,6 @@
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="80" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="19">
  <tileset firstgid="1" source="tileset/environment.tsx"/>
  <objectgroup id="3" name="Collisions">
-  <object id="9" x="2.99415" y="911.22" width="386.246" height="47.9688"/>
   <object id="13" x="0" y="911.333" width="382.667" height="48.6667"/>
   <object id="14" x="466.667" y="866.667" width="136" height="93.3333"/>
   <object id="16" x="692" y="817.333" width="135.333" height="142"/>
