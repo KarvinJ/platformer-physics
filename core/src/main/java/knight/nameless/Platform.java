@@ -110,14 +110,23 @@ public class Platform extends ApplicationAdapter {
                 if (checkCollisionInX(gameObject.getPreviousPosition(), structure)) {
 
 //                    Player was falling downwards. Resolve upwards.
-                    if (gameObject.velocity.y < 0)
+                    if (gameObject.velocity.y < 0) {
+
                         gameObject.bounds.y = structure.y + structure.height;
+                        gameObject.velocity.y = 0;
+
+                        //the player is on the ground and can jump
+                        if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
+                            player.velocity.y = 800 * deltaTime;
+                    }
 
 //                     Player was moving upwards. Resolve downwards
-                    else
-                        gameObject.bounds.y = structure.y - gameObject.bounds.height;
+                    else {
 
-                    gameObject.velocity.y = 0;
+                        //check this case. For the collision bug
+                        gameObject.bounds.y = structure.y - gameObject.bounds.height;
+                        gameObject.velocity.y = 0;
+                    }
                 }
                 //  If the player previous position is within the y bounds of the platform,
 //                then we need to resolve the collision by changing the x value
@@ -135,10 +144,6 @@ public class Platform extends ApplicationAdapter {
                 }
             }
         }
-
-        //there is some inconsistencies with the jump sometimes.
-        if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
-            player.velocity.y = 800 * deltaTime;
     }
 
     private void controlCameraPosition(OrthographicCamera camera) {
