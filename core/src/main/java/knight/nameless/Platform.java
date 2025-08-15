@@ -24,8 +24,8 @@ import knight.nameless.objects.Player;
 
 public class Platform extends ApplicationAdapter {
 
-    public final int SCREEN_WIDTH = 960;
-    public final int SCREEN_HEIGHT = 544;
+    public final int SCREEN_WIDTH = 640;
+    public final int SCREEN_HEIGHT = 360;
     private ShapeRenderer shapeRenderer;
     public OrthographicCamera camera = new OrthographicCamera();
     public ExtendViewport viewport;
@@ -42,7 +42,6 @@ public class Platform extends ApplicationAdapter {
     public void create() {
 
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
-        camera.zoom = 0.7f;
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         //the batch and shape needs to be initialized in the create method
@@ -200,7 +199,7 @@ public class Platform extends ApplicationAdapter {
         var isPlayerInsideMapBounds = isPlayerInsideMapBounds(playerPosition);
 
         if (!isDebugCamera && isPlayerInsideMapBounds)
-            camera.position.set(playerPosition.x, 200, 0);
+            camera.position.set(playerPosition.x, 180, 0);
 
         camera.update();
     }
