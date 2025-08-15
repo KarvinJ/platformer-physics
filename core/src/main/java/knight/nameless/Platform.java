@@ -115,8 +115,9 @@ public class Platform extends ApplicationAdapter {
                         gameObject.bounds.y = structure.y + structure.height;
                         gameObject.velocity.y = 0;
 
+                        var isPlayer = gameObject instanceof Player;
                         //the player is on the ground and can jump
-                        if (player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
+                        if (isPlayer && player.velocity.y == 0 && Gdx.input.isKeyPressed(Input.Keys.SPACE))
                             player.velocity.y = 800 * deltaTime;
                     }
 

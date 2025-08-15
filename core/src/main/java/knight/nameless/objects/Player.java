@@ -44,13 +44,13 @@ public class Player extends GameObject {
         bounds.y += velocity.y;
         bounds.x += velocity.x;
 
-        velocity.x *= 0.9f;
-
         if (Gdx.input.isKeyPressed(Input.Keys.D))
             velocity.x += speed * deltaTime;
 
         else if (Gdx.input.isKeyPressed(Input.Keys.A))
             velocity.x -= speed * deltaTime;
+
+        velocity.x *= 0.9f;
 
         if (bounds.y < 0) {
 
